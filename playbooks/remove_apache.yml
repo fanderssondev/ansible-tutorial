@@ -1,0 +1,15 @@
+---
+
+- name: Remove Apache and PHP packages
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Remove Apache and PHP packages
+      ansible.builtin.dnf:
+        name:
+          - httpd
+          - php
+          - php-cli
+          - php-mysqlnd
+        state: absent

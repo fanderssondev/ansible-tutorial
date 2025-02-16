@@ -1,0 +1,10 @@
+---
+
+- name: Update dnf cache
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Update cache
+      ansible.builtin.dnf:
+        update_cache: true
