@@ -5,6 +5,11 @@
   become: true
   tasks:
 
+    - name: Update repository index
+      ansible.builtin.dnf:
+        update_cache: true
+      when: ansible_os_family == 'RedHat'
+
     - name: Install Apache and PHP packages
       ansible.builtin.dnf:
         name:
@@ -13,6 +18,7 @@
           - php-cli
           - php-mysqlnd
         state: present
+      when: ansible_os_family == 'RedHat'
 
     - name: Start Apache service
       ansible.builtin.service:
