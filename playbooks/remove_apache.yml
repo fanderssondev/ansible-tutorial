@@ -1,11 +1,21 @@
 ---
 
-- name: Remove Apache and PHP packages
+- name: Install and configure Apache with PHP support
   hosts: all
   become: true
   tasks:
 
-    - name: Remove Apache and PHP packages
+    # - name: Update repository index - REDHAT
+    #   ansible.builtin.dnf:
+    #     update_cache: true
+    #   when: ansible_os_family == 'RedHat'
+
+    # - name: Update repository index - DEBIAN
+    #   ansible.builtin.apt:
+    #     update_cache: true
+    #   when: ansible_os_family == 'Debian'
+
+    - name: Uninstall Apache and PHP packages - REDHAT
       ansible.builtin.dnf:
         name:
           - httpd
@@ -13,3 +23,27 @@
           - php-cli
           - php-mysqlnd
         state: absent
+      when: ansible_os_family == 'RedHat'
+
+    - name: Uninstall Apache2 and PHP packages - DEBIAN
+      ansible.builtin.apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: absent
+      when: ansible_os_family == 'Debian'
+
+    - name: Close port 80 - REDHAT
+      ansible.posix.firewalld:
+        service: http
+        permanent: true
+        state: disabled
+        immediate: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Close port 80 - DEBIAN
+      community.general.ufw:
+        rule: deny
+        port: '80'
+        proto: tcp
+      when: ansible_os_family == 'Debian'

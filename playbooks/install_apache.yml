@@ -5,12 +5,17 @@
   become: true
   tasks:
 
-    - name: Update repository index
+    - name: Update repository index - REDHAT
       ansible.builtin.dnf:
         update_cache: true
       when: ansible_os_family == 'RedHat'
 
-    - name: Install Apache and PHP packages
+    - name: Update repository index - DEBIAN
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+
+    - name: Install Apache and PHP packages - REDHAT
       ansible.builtin.dnf:
         name:
           - httpd
@@ -20,20 +25,38 @@
         state: present
       when: ansible_os_family == 'RedHat'
 
-    - name: Start Apache service
+    - name: Install Apache2 and PHP packages - DEBIAN
+      ansible.builtin.apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Start Apache service - REDHAT
       ansible.builtin.service:
         name: httpd
         state: started
         enabled: true
+      when: ansible_os_family == 'RedHat'
 
-    - name: Open port 80
+    - name: Open port 80 - REDHAT
       ansible.posix.firewalld:
         service: http
         permanent: true
         state: enabled
         immediate: true
+      when: ansible_os_family == 'RedHat'
 
-    - name: Restart Apache to apply PHP changes
+    - name: Open port 80 - DEBIAN
+      community.general.ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+      when: ansible_os_family == 'Debian'
+
+    - name: Restart Apache to apply PHP changes - REDHAT
       ansible.builtin.service:
         name: httpd
         state: restarted
+      when: ansible_os_family == 'RedHat'
