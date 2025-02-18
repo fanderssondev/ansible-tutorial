@@ -3,6 +3,23 @@
 - name: Install and configure Apache with PHP support
   hosts: all
   become: true
+  pre_tasks:
+
+    - name: Install updates (Rocky)
+      ansible.builtin.dnf:
+        update_only: true
+        update_cache: true
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install updates (Debian)
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+
+- name: Configure web_servers
+  hosts: web_servers
+  become: true
   tasks:
 
     - name: Install Apache and PHP packages - REDHAT
@@ -14,7 +31,7 @@
         update_cache: true
       when: ansible_os_family == 'RedHat'
 
-    - name: Install Apache and php
+    - name: Install Apache and PHP packages - DEBIAN
       ansible.builtin.apt:
         name:
           - apache2
@@ -50,3 +67,30 @@
         name: httpd
         state: restarted
       when: ansible_os_family == 'RedHat'
+
+- name: Configure db_servers
+  hosts: db_servers
+  become: true
+  tasks:
+
+    - name: Install MariaDB packages - REDHAT
+      ansible.builtin.dnf:
+        name: mariadb
+        state: present
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install MariaDB packages - DEBIAN
+      ansible.builtin.apt:
+        name: mariadb-server
+        state: present
+      when: ansible_os_family == 'Debian'
+
+- name: Configure file_servers
+  hosts: file_servers
+  become: true
+  tasks:
+
+    - name: Install Samba packages
+      ansible.builtin.package:
+        name: samba
+        state: present
