@@ -8,12 +8,14 @@
   pre_tasks:
 
     - name: Install updates (Rocky)
+      tags: always
       ansible.builtin.dnf:
         update_only: true
         update_cache: true
       when: ansible_os_family == 'RedHat'
 
     - name: Install updates (Debian)
+      tags: always
       ansible.builtin.apt:
         upgrade: dist
         update_cache: true
@@ -25,6 +27,7 @@
   tasks:
 
     - name: Install Apache and PHP packages - REDHAT
+      tags: apache,redhat,rocky,httpd
       ansible.builtin.dnf:
         name:
           - httpd
@@ -34,6 +37,7 @@
       when: ansible_os_family == 'RedHat'
 
     - name: Install Apache and PHP packages - DEBIAN
+      tags: apache,apache2,ubuntu
       ansible.builtin.apt:
         name:
           - apache2
@@ -43,6 +47,7 @@
       when: ansible_os_family == 'Debian'
 
     - name: Start Apache service - REDHAT
+      tags: apache,redhat,rocky,httpd
       ansible.builtin.service:
         name: httpd
         state: started
@@ -50,6 +55,7 @@
       when: ansible_os_family == 'RedHat'
 
     - name: Open port 80 - REDHAT
+      tags: apache,redhat,rocky,httpd
       ansible.posix.firewalld:
         service: http
         permanent: true
@@ -58,6 +64,7 @@
       when: ansible_os_family == 'RedHat'
 
     - name: Open port 80 - DEBIAN
+      tags: apache,apache2,ubuntu
       community.general.ufw:
         rule: allow
         port: '80'
@@ -65,6 +72,7 @@
       when: ansible_os_family == 'Debian'
 
     - name: Restart Apache to apply PHP changes - REDHAT
+      tags: apache,redhat,rocky,httpd
       ansible.builtin.service:
         name: httpd
         state: restarted
@@ -76,12 +84,14 @@
   tasks:
 
     - name: Install MariaDB packages - REDHAT
+      tags: mariadb,redhat,rocky,db
       ansible.builtin.dnf:
         name: mariadb
         state: present
       when: ansible_os_family == 'RedHat'
 
     - name: Install MariaDB packages - DEBIAN
+      tags: mariadb,debian,ubuntu,db
       ansible.builtin.apt:
         name: mariadb-server
         state: present
@@ -92,7 +102,8 @@
   become: true
   tasks:
 
-    - name: Install Samba packages
+    - name: Install Samba packages - REDHAT
+      tags: samba,redhat,rocky,file
       ansible.builtin.package:
         name: samba
         state: present
