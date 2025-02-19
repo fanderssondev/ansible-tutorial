@@ -52,10 +52,10 @@ tmux new-session -d -s $SESSION -n ansible
 
 declare -A WINDOWS
 WINDOWS=(
-  [2]="rocky8a"
-  [3]="rocky8b"
-  [4]="rocky8c"
-  [5]="ubuntu24a"
+  [1]="rocky8a"
+  [2]="rocky8b"
+  [3]="rocky8c"
+  [4]="ubuntu24a"
 )
 
 for index in "${!WINDOWS[@]}"; do
