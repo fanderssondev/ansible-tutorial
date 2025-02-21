@@ -7,19 +7,19 @@
     ansible_become_password: "{{ lookup('file', '~/.vault_key') }}"
   pre_tasks:
 
-    - name: Install updates (Rocky)
-      tags: always
-      ansible.builtin.dnf:
-        update_only: true
-        update_cache: true
-      when: ansible_os_family == 'RedHat'
+    # - name: Install updates (Rocky)
+    #   tags: always
+    #   ansible.builtin.dnf:
+    #     update_only: true
+    #     update_cache: true
+    #   when: ansible_os_family == 'RedHat'
 
-    - name: Install updates (Debian)
-      tags: always
-      ansible.builtin.apt:
-        upgrade: dist
-        update_cache: true
-      when: ansible_os_family == 'Debian'
+    # - name: Install updates (Debian)
+    #   tags: always
+    #   ansible.builtin.apt:
+    #     upgrade: dist
+    #     update_cache: true
+    #   when: ansible_os_family == 'Debian'
 
 - name: Configure web_servers
   hosts: web_servers
@@ -77,6 +77,15 @@
         name: httpd
         state: restarted
       when: ansible_os_family == 'RedHat'
+
+    - name: Copy default html file for site
+      tags: apache,apache2,httpd
+      ansible.builtin.copy:
+        src: "{{ inventory_dir }}/files/default_site.html"
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: '0644'
 
 - name: Configure db_servers
   hosts: db_servers
