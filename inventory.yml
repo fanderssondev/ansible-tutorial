@@ -1,0 +1,11 @@
+all:
+  hosts:
+  vars:
+    ansible_user: fa
+    ansible_python_interpreter: /usr/bin/python3
+  children:
+    linux:
+      hosts:
+        rocky8a:
+          ansible_host: 192.168.223.101
+          ansible_port: 2222

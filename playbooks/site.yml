@@ -7,26 +7,26 @@
     ansible_become_password: "{{ lookup('file', '~/.vault_key') }}"
   pre_tasks:
 
-    # - name: Install updates (Rocky)
-    #   tags: always
-    #   ansible.builtin.dnf:
-    #     update_only: true
-    #     update_cache: true
-    #   when: ansible_os_family == 'RedHat'
+    - name: Install updates (Rocky)
+      tags: always
+      ansible.builtin.dnf:
+        update_only: true
+        update_cache: true
+      when: ansible_os_family == 'RedHat'
 
-    # - name: Install updates (Debian)
-    #   tags: always
-    #   ansible.builtin.apt:
-    #     upgrade: dist
-    #     update_cache: true
-    #   when: ansible_os_family == 'Debian'
+    - name: Install updates (Ubuntu)
+      tags: always
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+      when: ansible_os_family == 'Debian'
 
 - name: Configure web_servers
   hosts: web_servers
   become: true
   tasks:
 
-    - name: Install Apache and PHP packages - REDHAT
+    - name: Install Apache and PHP packages (Rocky)
       tags: apache,redhat,rocky,httpd
       ansible.builtin.dnf:
         name:
@@ -36,7 +36,7 @@
         update_cache: true
       when: ansible_os_family == 'RedHat'
 
-    - name: Install Apache and PHP packages - DEBIAN
+    - name: Install Apache and PHP packages (Ubuntu)
       tags: apache,apache2,ubuntu
       ansible.builtin.apt:
         name:
@@ -46,7 +46,7 @@
         update_cache: true
       when: ansible_os_family == 'Debian'
 
-    - name: Start Apache service - REDHAT
+    - name: Start Apache service (Rocky)
       tags: apache,redhat,rocky,httpd
       ansible.builtin.service:
         name: httpd
@@ -54,7 +54,7 @@
         enabled: true
       when: ansible_os_family == 'RedHat'
 
-    - name: Open port 80 - REDHAT
+    - name: Open port 80 (Rocky)
       tags: apache,redhat,rocky,httpd
       ansible.posix.firewalld:
         service: http
@@ -63,7 +63,7 @@
         immediate: true
       when: ansible_os_family == 'RedHat'
 
-    - name: Open port 80 - DEBIAN
+    - name: Open port 80 (Ubuntu)
       tags: apache,apache2,ubuntu
       community.general.ufw:
         rule: allow
@@ -71,7 +71,7 @@
         proto: tcp
       when: ansible_os_family == 'Debian'
 
-    - name: Restart Apache to apply PHP changes - REDHAT
+    - name: Restart Apache to apply PHP changes (Rocky)
       tags: apache,redhat,rocky,httpd
       ansible.builtin.service:
         name: httpd
@@ -92,14 +92,14 @@
   become: true
   tasks:
 
-    - name: Install MariaDB packages - REDHAT
+    - name: Install MariaDB packages (Rocky)
       tags: mariadb,redhat,rocky,db
       ansible.builtin.dnf:
         name: mariadb
         state: present
       when: ansible_os_family == 'RedHat'
 
-    - name: Install MariaDB packages - DEBIAN
+    - name: Install MariaDB packages (Ubuntu)
       tags: mariadb,debian,ubuntu,db
       ansible.builtin.apt:
         name: mariadb-server
@@ -111,7 +111,7 @@
   become: true
   tasks:
 
-    - name: Install Samba packages - REDHAT
+    - name: Install Samba packages
       tags: samba,redhat,rocky,file
       ansible.builtin.package:
         name: samba

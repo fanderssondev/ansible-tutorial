@@ -1,0 +1,180 @@
+---
+
+- name: Configure Linux host
+  hosts: all
+  vars:
+    ansible_become_password: "{{ lookup('file', '~/.vault_key') }}"
+  tasks:
+    - name: Create developers group
+      ansible.builtin.group:
+        name: developers
+
+    - name: Create testers group
+      ansible.builtin.group:
+        name: testers
+
+    - name: Create users group
+      ansible.builtin.group:
+        name: users
+        gid: 4100
+
+    - name: Create john group
+      ansible.builtin.group:
+        name: john
+        gid: 4000
+
+# Users ============================
+    - name: Create user John
+      ansible.builtin.user:
+        name: john
+        uid: 4000
+        group: john
+        groups:
+          - developers
+          - users
+        shell: /bin/bash
+        password: "$6$rounds=656000$mysecretsalt$L5TfnY7pEWOF0TQfksow3vO3hizg7G.P7sECrIdg8nEyz2jLgO59o3doQcnI/2qMdFYIH1J1HYyXuzPDfIryN."
+
+    - name: Create user Jane
+      ansible.builtin.user:
+        name: jane
+        uid: 4100
+        group: users
+        groups: testers
+        shell: /bin/bash
+
+# SSH keys
+    - name: Set authorized key John
+      ansible.posix.authorized_key:
+        user: john
+        state: present
+        key: "{{ lookup('file', '/home/fredrik/.ssh/id_rsa.pub') }}"
+
+    - name: Set authorized key Jane
+      ansible.posix.authorized_key:
+        user: jane
+        state: present
+        key: "{{ lookup('file', '/home/fredrik/.ssh/id_rsa.pub') }}"
+
+# Create sudo entry for John
+    - name: Add John to sudoers
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/john
+        content: "john ALL=(ALL) ALL: ALL"
+        owner: root
+        group: root
+        mode: "0440"
+
+# Prevent root login
+    - name: Disable Root Login
+      ansible.builtin.lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: ^(#?PermitRootLogin)+\s*
+        line: "PermitRootLogin no"
+        state: present
+        backup: true
+      become: true
+      notify:
+        - restart_ssh
+
+# Install webservers
+    - name: Install packages
+      ansible.builtin.package:
+        name:
+          - nginx
+          - libselinux
+          - libsemanage
+          - python3-libsemanage
+          - python3-firewall
+
+# Configure Nginx
+    - name: Copy Nginx configuration
+      ansible.builtin.copy:
+        src: "{{ inventory_dir }}/files/nginx.conf"
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - restart_nginx
+
+# Create directories
+    - name: Create directories example.net
+      ansible.builtin.file:
+        path: /websites/www.example.net
+        state: directory
+        recurse: true
+        owner: nginx
+        group: nginx
+      notify:
+        - restart_nginx
+
+    - name: Create directories domain.org
+      ansible.builtin.file:
+        path: /websites/www.domain.org
+        state: directory
+        recurse: true
+        owner: nginx
+        group: nginx
+      notify:
+        - restart_nginx
+
+    - name: Create domain.org index.html
+      ansible.builtin.copy:
+        dest: /websites/www.domain.org/index.html
+        content: "<h1>Welcome to domain.org</h1>"
+        owner: nginx
+        group: nginx
+        mode: "0644"
+
+    - name: Create example.net index.html
+      ansible.builtin.copy:
+        dest: /websites/www.example.net/index.html
+        content: "<h1>Welcome to example.net</h1>"
+        owner: nginx
+        group: nginx
+        mode: "0644"
+
+
+# Open port 80
+    - name: Open port 80
+      ansible.posix.firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: true
+      vars:
+        ansible_python_interpreter: /usr/libexec/platform-python
+
+# Set SEbool value
+    - name: Set SELinux boolean httpd_can_network_connect
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        persistent: true
+        state: true
+      vars:
+        ansible_python_interpreter: /usr/libexec/platform-python
+
+# Handlers
+  handlers:
+    - name: Restart ssh
+      ansible.builtin.systemd:
+        name: sshd
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_ssh
+
+    - name: Restart nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_nginx
+
+# TODO - log from rocky8a
+# mkdir -p /usr/share/nginx/logs/
+# touch /usr/share/nginx/logs/error.log
+# chown nginx:nginx /usr/share/nginx/logs/error.log
+# chown nginx:nginx /usr/share/nginx/logs

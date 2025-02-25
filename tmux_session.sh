@@ -16,7 +16,7 @@
 #   - Note: Running with `-d` will terminate all windows in the session.
 #
 # Author: Fredrik Andersson
-# Github: https://github.com/fanderssondev/dotfiles/
+# Github: https://github.com/fanderssondev/ansible-tutorial
 # ==========================
 
 
