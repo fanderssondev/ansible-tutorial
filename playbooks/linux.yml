@@ -33,7 +33,7 @@
           - developers
           - users
         shell: /bin/bash
-        password: "$6$rounds=656000$mysecretsalt$L5TfnY7pEWOF0TQfksow3vO3hizg7G.P7sECrIdg8nEyz2jLgO59o3doQcnI/2qMdFYIH1J1HYyXuzPDfIryN."
+        password: '$6$rounds=656000$mysecretsalt$L5TfnY7pEWOF0TQfksow3vO3hizg7G.P7sECrIdg8nEyz2jLgO59o3doQcnI/2qMdFYIH1J1HYyXuzPDfIryN.'
 
     - name: Create user Jane
       ansible.builtin.user:
@@ -60,17 +60,17 @@
     - name: Add John to sudoers
       ansible.builtin.copy:
         dest: /etc/sudoers.d/john
-        content: "john ALL=(ALL) NOPASSWD: ALL"
+        content: 'john ALL=(ALL) NOPASSWD: ALL'
         owner: root
         group: root
-        mode: "0440"
+        mode: '0440'
 
     # Prevent root login ========================
     - name: Disable Root Login
       ansible.builtin.lineinfile:
         dest: /etc/ssh/sshd_config
         regexp: ^(#?PermitRootLogin)+\s*
-        line: "PermitRootLogin no"
+        line: 'PermitRootLogin no'
         state: present
         backup: true
       become: true
@@ -96,24 +96,28 @@
     # Configure Nginx
     - name: Copy Nginx configuration
       ansible.builtin.copy:
-        src: "{{ inventory_dir }}/files/nginx.conf"
+        src: '{{ inventory_dir }}/files/nginx.conf'
         dest: /etc/nginx/nginx.conf
         owner: root
         group: root
-        mode: "0644"
+        mode: '0644'
       notify:
         - restart_nginx
 
     # TODO - log from rocky8a
-    # [] mkdir -p /usr/share/nginx/logs/
-    # [] touch /usr/share/nginx/logs/error.log
-    # [] chown nginx:nginx /usr/share/nginx/logs/error.log
-    # [] chown nginx:nginx /usr/share/nginx/logs
+    # [x] mkdir -p /usr/share/nginx/logs/
+    # [x] touch /usr/share/nginx/logs/error.log
+    # [x] chown nginx:nginx /usr/share/nginx/logs/error.log
+    # [x] chown nginx:nginx /usr/share/nginx/logs
+    # [] add hosts to /etc/hosts i.e. 192.168.56.10x www.example.net
 
     # Create directories ========================
-    - name: Create logs directory
+    - name: Create logs directories
       ansible.builtin.file:
-        path: /usr/share/nginx/logs/
+        path:
+          - /usr/share/nginx/
+          - /usr/share/nginx/logs/
+          - /var/log/nginx/
         state: directory
         recurse: true
         owner: nginx
@@ -144,29 +148,30 @@
     # Create files ==============================
     - name: Create nginx error.log file
       ansible.builtin.file:
-        path: /usr/share/nginx/logs/error.log
+        path:
+          - /usr/share/nginx/logs/error.log
         state: touch
         owner: nginx
         group: nginx
-        mode: "0644"
+        mode: '0644'
       notify:
         - restart_nginx
 
     - name: Create domain.org index.html
       ansible.builtin.copy:
         dest: /websites/www.domain.org/index.html
-        content: "<h1>Welcome to domain.org</h1>"
+        content: '<h1>Welcome to domain.org</h1>'
         owner: nginx
         group: nginx
-        mode: "0644"
+        mode: '0644'
 
     - name: Create example.net index.html
       ansible.builtin.copy:
         dest: /websites/www.example.net/index.html
-        content: "<h1>Welcome to example.net</h1>"
+        content: '<h1>Welcome to example.net</h1>'
         owner: nginx
         group: nginx
-        mode: "0644"
+        mode: '0644'
 
     # Open port 80 ==============================
     - name: Open port 80
