@@ -1,36 +1,151 @@
-What I want you to do during Christmas break:
+# **Server World Portal and CLI Tools**
 
-Configure linux machine with
-Groups
-i. developers
+## **Server World Portal**
 
-                                                             ii.      testers
+Used in my presentation as a source of configuration files:  
+🔗 [Server World](https://www.server-world.info/en/)
 
-Users
-i. John – uid 4000 – gid: 4000 – groups: john (gid=4000), users, developers
+## **Useful CLI Tools**
 
-                                                             ii.      Jane – uid 4100 – gid: 4100 – group: (users=4100, testers)
+- [CLI Tools You Can't Live Without](https://dev.to/lissy93/cli-tools-you-cant-live-without-57f6)
+- [Best Command-Line Tools](https://new.pythonforengineers.com/blog/best-command-line-tools-ive-played-with/)
 
-Exchange keys for those users so that you can login without password
-Make sudo right for user john – please search how in the internet – on the server world there is tutorial how to do that
-Configure sshd service so that root login is forbidden
-i. Configure chroot jail for all users including sftp subsystem
+---
 
-                                                             ii.      Make sure (as per homework) that even in chroot jail system users will still be able to login to shell (/bin/bash)
+# **Tools Used During My Presentation**
 
-Configure webserver with nginx with two websites which will be responsive only for specific url (look above)
-|Configure NFS with two shares
-i. /nfs/developers and /nfs/testers
+## **Services Configured (In Order of Appearance)**
 
-                                                             ii.      Make those shares only writeable for specific group
+### **1. SSH and SFTP with Chroot Jail**
 
-                                                           iii.      Folder testers should be only accessible from one IP address (you need second linux machine for that)
+🔗 [Setup Guide](https://www.server-world.info/en/note?os=Rocky_Linux_8&p=ssh&f=5)
 
-                                                           iv.      Don’t allow root write in the shares
+#### **Homework:**
 
-                                                             v.      Mount the shares on second machine test if users john and jane from the second machine can write to allowed folders if necessary set the ACL
+- Configure a chroot jail to the home directory.
+- Ensure SSH login to Bash is allowed.
 
-Configure dnsmasq and provide name resolution from /etc/hosts file and change domain for pierce.com to point to the ip 199.199.20.20 (we don’t care if its taken or not name resolution should work)
-Configure bind with local domain like devops.training and provide records with you linux machines ip as records A types
+---
 
-History of command unfortunately is gone as I had restored the VM from snapshot – but you have all the steps in the presented links above.
+### **2. Web Server (Apache)**
+
+🔗 [Setup Guide](https://www.server-world.info/en/note?os=CentOS_Stream_9&p=httpd&f=1)
+
+- Create two websites: `www.example.net` and `www.domain.org` on the same Linux machine.
+- Ensure the websites are accessible only when the exact URL is provided.
+
+#### **Homework:**
+
+- Set up the same configuration using **NGINX** instead of Apache.
+
+---
+
+### **3. NFS Storage**
+
+- Create an NFS share and export it to other clients.
+- Restrict one client to **read-only** access.
+- Configure **ACLs** to allow only specific UID/GID to write to the share.
+
+---
+
+### **4. DNS Configuration**
+
+#### **(i) Configure Dnsmasq (Local Caching DNS Service)**
+
+- Use `/etc/hosts` to ensure the Linux box responds to `nslookup` and `host` queries.  
+  🔗 [Setup Guide](https://www.server-world.info/en/note?os=CentOS_Stream_9&p=dnsmasq&f=1)
+
+#### **(ii) Configure BIND DNS Service**
+
+- Remove dnsmasq.
+- Configure a zone in `named.conf`.
+- Set up proper records in `/var/named/<file>`.
+- Create **SOA, NS, and A records**.  
+  🔗 [Setup Guide](https://www.server-world.info/en/note?os=CentOS_Stream_9&p=dns&f=2)
+
+---
+
+# **Commands & Tools Used**
+
+```
+nslookup
+dig
+netstat
+ip
+systemctl
+firewall-cmd
+setenforce 0|1
+ssh-keygen, ssh-copy-id
+setfacl
+exportfs -ra
+```
+
+📌 **REMEMBER**: Use `man <command>` to get additional information.
+
+---
+
+# **Christmas Break Tasks**
+
+## **1. Configure a Linux Machine with Users & Groups**
+
+### **Groups:**
+
+- **developers**
+- **testers**
+
+### **Users:**
+
+- **John** → UID: `4000`, GID: `4000`, Groups: `john (4000)`, `users`, `developers`
+- **Jane** → UID: `4100`, GID: `4100`, Groups: `users (4100)`, `testers`
+
+📌 **Task:** Exchange SSH keys for these users to enable passwordless login.
+
+---
+
+## **2. Grant Sudo Rights**
+
+- Grant **sudo** access to `john`.
+- Research how to do this online (Server World has a tutorial).
+
+---
+
+## **3. Secure SSH Access**
+
+- **Disable root login** in the SSHD service.
+- **Configure a chroot jail for all users**, including the **SFTP subsystem**.
+- Ensure that **even in chroot jail, system users can still log in to Bash**.
+
+---
+
+## **4. Configure Nginx Web Server**
+
+- Set up **two websites** that only respond to specific URLs (same as Apache configuration).
+
+---
+
+## **5. Configure NFS with Two Shares**
+
+- `/nfs/developers`
+- `/nfs/testers`
+
+### **Permissions & Restrictions:**
+
+✅ **Only writable by specific groups**  
+✅ **Testers' folder should be accessible from one IP address** (requires a second Linux machine)  
+✅ **Root should not have write permissions**  
+✅ **Mount the shares on a second machine and test access for `john` and `jane`**  
+✅ **Set ACLs if necessary**
+
+---
+
+## **6. Configure DNS Services**
+
+### **(i) Dnsmasq Setup**
+
+- Provide name resolution from `/etc/hosts`.
+- Change the domain `pierce.com` to point to `199.199.20.20` (regardless of availability).
+
+### **(ii) BIND DNS Setup**
+
+- Configure a **local domain**: `devops.training`.
+- Create **A records** pointing to the Linux machine's IP.
