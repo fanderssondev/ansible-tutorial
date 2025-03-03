@@ -65,6 +65,7 @@
         group: root
         mode: '0440'
 
+    # Redundant now given the next play
     # Prevent root login ========================
     - name: Disable Root Login
       ansible.builtin.lineinfile:
@@ -73,6 +74,36 @@
         line: 'PermitRootLogin no'
         state: present
         backup: true
+      become: true
+      notify:
+        - restart_ssh
+
+    # ===========================================
+    # Confgure chroot jail ======================
+    # ===========================================
+    - name: Create sftp_users group
+      ansible.builtin.group:
+        name: sftp_users
+
+    - name: Add john to sftp_users
+      ansible.builtin.user:
+        name: john
+        groups: sftp_users
+        append: true
+
+    - name: Add jane to sftp_users
+      ansible.builtin.user:
+        name: jane
+        groups: sftp_users
+        append: true
+
+    - name: Copy sshd_config file
+      ansible.builtin.copy:
+        src: '{{ inventory_dir }}/files/sshd_config'
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: '0440'
       become: true
       notify:
         - restart_ssh
@@ -103,13 +134,6 @@
         mode: '0644'
       notify:
         - restart_nginx
-
-    # TODO - log from rocky8a
-    # [x] mkdir -p /usr/share/nginx/logs/
-    # [x] touch /usr/share/nginx/logs/error.log
-    # [x] chown nginx:nginx /usr/share/nginx/logs/error.log
-    # [x] chown nginx:nginx /usr/share/nginx/logs
-    # [] add hosts to /etc/hosts i.e. 192.168.56.10x www.example.net
 
     # Create directories ========================
     - name: Create logs directories
