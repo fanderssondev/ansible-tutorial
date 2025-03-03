@@ -108,6 +108,25 @@
       notify:
         - restart_ssh
 
+    # ===========================================
+    # Configure DNS Services ====================
+    # ===========================================
+
+    # (i) Dnsmasq Setup==========================
+    - name: Install dnsmasq
+      ansible.builtin.package:
+        name:
+          - dnsmasq
+          - bind-utils
+
+    # (ii) BIND DNS Setup =======================
+
+    # [] configure /etc/dnsmasq.conf and start/enable
+    # [] confgure /etc/hosts
+    # [] confgure firewall-cmd
+    # [] confgure nmcli connection
+    # https://www.server-world.info/en/note?os=Rocky_Linux_8&p=dnsmasq&f=1
+
     # Set system time ===========================
     - name: Set timezone to Europe/Madrid
       become: true
