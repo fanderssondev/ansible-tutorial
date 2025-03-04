@@ -1,0 +1,11 @@
+- name: Disable SELinux
+  ansible.posix.selinux:
+    state: permissive
+    policy: targeted
+    update_kernel_param: true
+
+# Set system time ===========================
+- name: Set timezone to Europe/Madrid
+  become: true
+  community.general.timezone:
+    name: Europe/Madrid

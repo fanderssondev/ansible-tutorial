@@ -1,0 +1,89 @@
+# Install webservers ========================
+- name: Install packages
+  ansible.builtin.package:
+    name:
+      - nginx
+      - libselinux
+      - libsemanage
+      - python3-libsemanage
+      - python3-firewall
+
+# Configure Nginx
+- name: Copy Nginx configuration
+  ansible.builtin.copy:
+    src: nginx.conf # TODO update file path
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - restart_nginx
+
+# Create directories ========================
+- name: Create logs directories
+  ansible.builtin.file:
+    path: /usr/share/nginx/logs
+    state: directory
+    recurse: true
+    owner: nginx
+    group: nginx
+    mode: '0755'
+  notify:
+    - restart_nginx
+
+- name: Create directories example.net
+  ansible.builtin.file:
+    path: /websites/www.example.net
+    state: directory
+    recurse: true
+    owner: nginx
+    group: nginx
+  notify:
+    - restart_nginx
+
+- name: Create directories domain.org
+  ansible.builtin.file:
+    path: /websites/www.domain.org
+    state: directory
+    recurse: true
+    owner: nginx
+    group: nginx
+  notify:
+    - restart_nginx
+
+# Create files ==============================
+- name: Create nginx error.log file
+  ansible.builtin.file:
+    path: /usr/share/nginx/logs/error.log
+    state: touch
+    owner: nginx
+    group: nginx
+    mode: '0644'
+  notify:
+    - restart_nginx
+
+- name: Create domain.org index.html
+  ansible.builtin.copy:
+    dest: /websites/www.domain.org/index.html
+    content: '<h1>Welcome to domain.org</h1>' # TODO move to j2 template file
+    owner: nginx
+    group: nginx
+    mode: '0644'
+
+- name: Create example.net index.html
+  ansible.builtin.copy:
+    dest: /websites/www.example.net/index.html
+    content: '<h1>Welcome to example.net</h1>' # TODO move to j2 template file
+    owner: nginx
+    group: nginx
+    mode: '0644'
+
+# Open port 80 ==============================
+- name: Open port 80
+  ansible.posix.firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: true
+  vars:
+    ansible_python_interpreter: /usr/libexec/platform-python

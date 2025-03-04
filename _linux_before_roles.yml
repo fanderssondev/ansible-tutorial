@@ -242,18 +242,18 @@
         path: /nfs/developers
         state: directory
         recurse: true
-        owner: root
+        owner: developers
         group: developers
-        mode: '0770'
+        mode: '0755'
 
     - name: Create testers directory
       ansible.builtin.file:
         path: /nfs/testers
         state: directory
         recurse: true
-        owner: root
+        owner: testers
         group: testers
-        mode: '0770'
+        mode: '0755'
 
     - name: Render nfs configuration
       ansible.builtin.template:

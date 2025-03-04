@@ -1,0 +1,52 @@
+---
+# - name: Configure Linux host
+#   hosts: all
+#   become: true
+#   roles:
+#     - base
+
+# - name: Setup users
+#   hosts: all
+#   become: true
+#   roles:
+#     - users
+
+- name: Configure web_servers
+  hosts: all
+  become: true
+  roles:
+    - web_servers
+
+  # Handlers ====================================
+  handlers:
+    - name: Restart ssh
+      ansible.builtin.systemd:
+        name: sshd
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_ssh
+
+    - name: Restart nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_nginx
+
+    - name: Restart nfs
+      ansible.builtin.systemd:
+        name: nfs-server
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_nfs
+
+    - name: Restart rpcbind
+      ansible.builtin.systemd:
+        name: rpcbind
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_rpcbind
