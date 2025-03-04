@@ -157,14 +157,12 @@
     # Create directories ========================
     - name: Create logs directories
       ansible.builtin.file:
-        path:
-          - /usr/share/nginx/
-          - /usr/share/nginx/logs/
-          - /var/log/nginx/
+        path: /usr/share/nginx/logs
         state: directory
         recurse: true
         owner: nginx
         group: nginx
+        mode: '0755'
       notify:
         - restart_nginx
 
@@ -191,8 +189,7 @@
     # Create files ==============================
     - name: Create nginx error.log file
       ansible.builtin.file:
-        path:
-          - /usr/share/nginx/logs/error.log
+        path: /usr/share/nginx/logs/error.log
         state: touch
         owner: nginx
         group: nginx
@@ -226,6 +223,67 @@
       vars:
         ansible_python_interpreter: /usr/libexec/platform-python
 
+    # Configure NFS
+    - name: Install nfs packages
+      ansible.builtin.dnf:
+        name: nfs-utils
+
+    - name: Create nfs directories
+      ansible.builtin.file:
+        path: /nfs
+        state: directory
+        recurse: true
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create developers directory
+      ansible.builtin.file:
+        path: /nfs/developers
+        state: directory
+        recurse: true
+        owner: root
+        group: developers
+        mode: '0770'
+
+    - name: Create testers directory
+      ansible.builtin.file:
+        path: /nfs/testers
+        state: directory
+        recurse: true
+        owner: root
+        group: testers
+        mode: '0770'
+
+    - name: Render nfs configuration
+      ansible.builtin.template:
+        src: '{{ inventory_dir }}/files/exports.j2'
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: '0440'
+      notify:
+        - restart_nfs
+        - restart_rpcbind
+
+    - name: Open nfs
+      ansible.posix.firewalld:
+        service: nfs
+        permanent: true
+        state: enabled
+        immediate: true
+      vars:
+        ansible_python_interpreter: /usr/libexec/platform-python
+
+    - name: Open nfs
+      ansible.posix.firewalld:
+        service: nfs3
+        permanent: true
+        state: enabled
+        immediate: true
+      vars:
+        ansible_python_interpreter: /usr/libexec/platform-python
+
     # Set SEbool value ==========================
     # - name: Set SELinux boolean httpd_can_network_connect
     #   ansible.posix.seboolean:
@@ -237,7 +295,9 @@
 
     - name: Disable SELinux
       ansible.posix.selinux:
-        state: disabled
+        state: permissive
+        policy: targeted
+        update_kernel_param: true
 
   # Handlers ====================================
   handlers:
@@ -256,3 +316,19 @@
         enabled: true
         daemon_reload: true
       listen: restart_nginx
+
+    - name: Restart nfs
+      ansible.builtin.systemd:
+        name: nfs-server
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_nfs
+
+    - name: Restart rpcbind
+      ansible.builtin.systemd:
+        name: rpcbind
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      listen: restart_rpcbind
