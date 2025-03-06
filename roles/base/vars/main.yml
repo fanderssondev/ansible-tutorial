@@ -1,0 +1,8 @@
+base_timezone: Europe/Madrid
+
+base_packages:
+  - nginx
+  - libselinux
+  - libsemanage
+  - python3-libsemanage
+  - python3-firewall

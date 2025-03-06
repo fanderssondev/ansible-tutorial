@@ -1,11 +1,14 @@
+- name: Install needed packages
+  ansible.builtin.package:
+    name: "{{ base_packages }}"
+
 - name: Disable SELinux
   ansible.posix.selinux:
     state: permissive
     policy: targeted
     update_kernel_param: true
 
-# Set system time ===========================
-- name: Set timezone to Europe/Madrid
+- name: Set system time
   become: true
   community.general.timezone:
-    name: Europe/Madrid
+    name: "{{ base_timezone }}"

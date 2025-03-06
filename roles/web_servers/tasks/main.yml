@@ -1,82 +1,45 @@
-# Install webservers ========================
-- name: Install packages
-  ansible.builtin.package:
-    name:
-      - nginx
-      - libselinux
-      - libsemanage
-      - python3-libsemanage
-      - python3-firewall
+# BUG Changes ownership of /websites/* if exists but does not create them
+- name: Create directories
+  ansible.builtin.file:
+    path: /usr/share/nginx/logs
+    state: "{{ item.state }}"
+    recurse: "{{ item.recurse | default(omit) }}"
+    owner: nginx
+    group: nginx
+    mode: "{{ item.mode | default(omit) }}"
+  loop: "{{ web_servers_dirs }}"
+  notify:
+    - restart_nginx
 
-# Configure Nginx
-- name: Copy Nginx configuration
+# REVIEW ok to use name instead of owner/group?
+- name: Copy files/templates
   ansible.builtin.copy:
-    src: nginx.conf # TODO update file path
-    dest: /etc/nginx/nginx.conf
-    owner: root
-    group: root
-    mode: '0644'
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0644"
+  loop: "{{ web_servers_files }}"
   notify:
     - restart_nginx
 
 # Create directories ========================
-- name: Create logs directories
-  ansible.builtin.file:
-    path: /usr/share/nginx/logs
-    state: directory
-    recurse: true
-    owner: nginx
-    group: nginx
-    mode: '0755'
-  notify:
-    - restart_nginx
-
-- name: Create directories example.net
-  ansible.builtin.file:
-    path: /websites/www.example.net
-    state: directory
-    recurse: true
-    owner: nginx
-    group: nginx
-  notify:
-    - restart_nginx
-
-- name: Create directories domain.org
-  ansible.builtin.file:
-    path: /websites/www.domain.org
-    state: directory
-    recurse: true
-    owner: nginx
-    group: nginx
-  notify:
-    - restart_nginx
-
-# Create files ==============================
-- name: Create nginx error.log file
-  ansible.builtin.file:
-    path: /usr/share/nginx/logs/error.log
-    state: touch
-    owner: nginx
-    group: nginx
-    mode: '0644'
-  notify:
-    - restart_nginx
-
-- name: Create domain.org index.html
-  ansible.builtin.copy:
-    dest: /websites/www.domain.org/index.html
-    content: '<h1>Welcome to domain.org</h1>' # TODO move to j2 template file
-    owner: nginx
-    group: nginx
-    mode: '0644'
-
-- name: Create example.net index.html
-  ansible.builtin.copy:
-    dest: /websites/www.example.net/index.html
-    content: '<h1>Welcome to example.net</h1>' # TODO move to j2 template file
-    owner: nginx
-    group: nginx
-    mode: '0644'
+# TODO move to j2 template file
+# - name: Create domain.org index.html
+#   ansible.builtin.copy:
+#     dest: /websites/www.domain.org/index.html
+#     content: "<h1>Welcome to domain.org</h1>"
+#     owner: nginx
+#     group: nginx
+#     mode: "0644"
+# TODO move to j2 template file
+# - name: Create example.net index.html
+#   ansible.builtin.copy:
+#     dest: /websites/www.example.net/index.html
+#     content: "<h1>Welcome to example.net</h1>"
+#     owner: nginx
+#     group: nginx
+#     mode: "0644"
 
 # Open port 80 ==============================
 - name: Open port 80

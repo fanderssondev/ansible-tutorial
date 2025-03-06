@@ -19,34 +19,18 @@
 
   # Handlers ====================================
   handlers:
-    - name: Restart ssh
-      ansible.builtin.systemd:
-        name: sshd
-        state: restarted
-        enabled: true
-        daemon_reload: true
-      listen: restart_ssh
+    # - name: Restart nfs
+    #   ansible.builtin.systemd:
+    #     name: nfs-server
+    #     state: restarted
+    #     enabled: true
+    #     daemon_reload: true
+    #   listen: restart_nfs
 
-    - name: Restart nginx
-      ansible.builtin.systemd:
-        name: nginx
-        state: restarted
-        enabled: true
-        daemon_reload: true
-      listen: restart_nginx
-
-    - name: Restart nfs
-      ansible.builtin.systemd:
-        name: nfs-server
-        state: restarted
-        enabled: true
-        daemon_reload: true
-      listen: restart_nfs
-
-    - name: Restart rpcbind
-      ansible.builtin.systemd:
-        name: rpcbind
-        state: restarted
-        enabled: true
-        daemon_reload: true
-      listen: restart_rpcbind
+    # - name: Restart rpcbind
+    #   ansible.builtin.systemd:
+    #     name: rpcbind
+    #     state: restarted
+    #     enabled: true
+    #     daemon_reload: true
+    #   listen: restart_rpcbind
