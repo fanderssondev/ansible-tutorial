@@ -1,15 +1,15 @@
 ---
-# - name: Configure Linux host
-#   hosts: all
-#   become: true
-#   roles:
-#     - base
+- name: Configure Linux host
+  hosts: all
+  become: true
+  roles:
+    - base
 
-# - name: Setup users
-#   hosts: all
-#   become: true
-#   roles:
-#     - users
+- name: Setup users
+  hosts: all
+  become: true
+  roles:
+    - users
 
 - name: Configure web_servers
   hosts: all

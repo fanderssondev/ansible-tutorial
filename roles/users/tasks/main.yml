@@ -18,7 +18,7 @@
   ansible.posix.authorized_key:
     user: "{{ item.name }}"
     state: present
-    key: "{{ lookup('file', '/home/fredrik/.ssh/id_rsa.pub') }}"
+    key: "{{ lookup('file', '/home/fredrik/.ssh/id_ansible.pub') }}"
   loop: "{{ users_users }}"
 
 - name: Add users to sudoers
@@ -31,14 +31,23 @@
     mode: "0440"
   loop: "{{ users_users }}"
 
-# REVIEW Should it be here?
-- name: Disable Root Login
+- name: Configure /etc/ssh/sshd_config
   ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
-    regexp: ^(#?PermitRootLogin)+\s*
-    line: "PermitRootLogin no"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
     state: present
     backup: true
-  become: true
+  loop: "{{ users_regex }}"
   notify:
     - restart_ssh
+# - name: Disable Root Login
+#   ansible.builtin.lineinfile:
+#     dest: /etc/ssh/sshd_config
+#     regexp: ^(#?PermitRootLogin)+\s*
+#     line: "PermitRootLogin no"
+#     state: present
+#     backup: true
+#   become: true
+#   notify:
+#     - restart_ssh
