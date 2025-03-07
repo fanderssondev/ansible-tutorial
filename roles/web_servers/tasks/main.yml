@@ -1,47 +1,29 @@
-# BUG Changes ownership of /websites/* if exists but does not create them
 - name: Create directories
   ansible.builtin.file:
-    path: /usr/share/nginx/logs
+    path: "{{ item.path }}"
     state: "{{ item.state }}"
     recurse: "{{ item.recurse | default(omit) }}"
     owner: nginx
     group: nginx
     mode: "{{ item.mode | default(omit) }}"
+    modification_time: preserve
+    access_time: preserve
   loop: "{{ web_servers_dirs }}"
   notify:
     - restart_nginx
 
 # REVIEW ok to use name instead of owner/group?
 - name: Copy files/templates
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: "0644"
-  loop: "{{ web_servers_files }}"
+  loop: "{{ web_servers_templates }}"
   notify:
     - restart_nginx
 
-# Create directories ========================
-# TODO move to j2 template file
-# - name: Create domain.org index.html
-#   ansible.builtin.copy:
-#     dest: /websites/www.domain.org/index.html
-#     content: "<h1>Welcome to domain.org</h1>"
-#     owner: nginx
-#     group: nginx
-#     mode: "0644"
-# TODO move to j2 template file
-# - name: Create example.net index.html
-#   ansible.builtin.copy:
-#     dest: /websites/www.example.net/index.html
-#     content: "<h1>Welcome to example.net</h1>"
-#     owner: nginx
-#     group: nginx
-#     mode: "0644"
-
-# Open port 80 ==============================
 - name: Open port 80
   ansible.posix.firewalld:
     service: http

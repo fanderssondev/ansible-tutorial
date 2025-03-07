@@ -1,13 +1,14 @@
 web_servers_dirs:
-  - path: /usr/share/nginx/logs
-    state: directory
-    mode: "0755"
   - path: /websites/www.example.net
     state: directory
     recurse: true
   - path: /websites/www.domain.org
     state: directory
     recurse: true
+  - path: /usr/share/nginx/logs
+    state: directory
+    recurse: true
+    mode: "0755"
   - path: /usr/share/nginx/logs/error.log
     state: touch
     mode: "0644"
@@ -16,6 +17,8 @@ web_servers_files:
   - src: files/nginx.conf
     dest: /etc/nginx/nginx.conf
     name: root
+
+web_servers_templates:
   - src: templates/index.html.j2
     dest: /websites/www.domain.org/index.html
     site: www.domain.org
@@ -24,3 +27,6 @@ web_servers_files:
     dest: /websites/www.example.net/index.html
     site: www.example.net
     name: nginx
+  - src: templates/hosts.j2
+    dest: /etc/hosts
+    name: root
