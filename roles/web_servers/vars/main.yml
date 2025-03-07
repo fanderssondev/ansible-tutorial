@@ -8,7 +8,6 @@ web_servers_dirs:
   - path: /usr/share/nginx/logs
     state: directory
     recurse: true
-    mode: "0755"
   - path: /usr/share/nginx/logs/error.log
     state: touch
     mode: "0644"
