@@ -1,0 +1,8 @@
+- name: Restart services
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  listen: "{{ item.listen }}"
+  loop: "{{ nfs_server_handlers }}"

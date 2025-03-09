@@ -26,6 +26,3 @@ web_servers_templates:
     dest: /websites/www.example.net/index.html
     site: www.example.net
     name: nginx
-  - src: templates/hosts.j2
-    dest: /etc/hosts
-    name: root

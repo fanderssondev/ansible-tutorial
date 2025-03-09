@@ -41,13 +41,3 @@
   loop: "{{ users_regex }}"
   notify:
     - restart_ssh
-# - name: Disable Root Login
-#   ansible.builtin.lineinfile:
-#     dest: /etc/ssh/sshd_config
-#     regexp: ^(#?PermitRootLogin)+\s*
-#     line: "PermitRootLogin no"
-#     state: present
-#     backup: true
-#   become: true
-#   notify:
-#     - restart_ssh

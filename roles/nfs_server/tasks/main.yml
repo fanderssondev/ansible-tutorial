@@ -1,0 +1,30 @@
+- name: Create nfs directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    # recurse: true
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "0755"
+  loop: "{{ nfs_server_dirs }}"
+
+- name: Render nfs configuration
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0440"
+  notify:
+    - restart_nfs
+    - restart_rpcbind
+
+- name: Open nfs
+  ansible.posix.firewalld:
+    service: "{{ item.service }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop: "{{ nfs_server_services }}"
+  vars:
+    ansible_python_interpreter: /usr/libexec/platform-python

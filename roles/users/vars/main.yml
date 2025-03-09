@@ -1,6 +1,10 @@
+# TODO refactor to be able to be used on both server and client
+
 users_groups:
   - name: developers
+    gid: 2000 # To be tested
   - name: testers
+    gid: 2100 # To be tested
   - name: users
     gid: 4100
   - name: john

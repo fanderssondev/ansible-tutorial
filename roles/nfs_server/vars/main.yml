@@ -1,0 +1,19 @@
+nfs_server_dirs:
+  - path: /nfs
+    owner: root
+    group: root
+  - path: /nfs/developers
+    group: developers
+  - path: /nfs/testers
+    group: testers
+
+nfs_server_services:
+  - service: nfs
+  - service: nfs3
+  - service: mountd
+
+nfs_server_handlers:
+  - name: nfs-server
+    listen: restart_nfs
+  - name: rpcbind
+    listen: restart_rpcbind

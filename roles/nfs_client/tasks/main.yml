@@ -1,0 +1,17 @@
+- name: Configure /etc/idmapd.conf
+  ansible.builtin.lineinfile:
+    dest: /etc/idmapd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    backup: true
+  loop: "{{ nfs_client_regex }}"
+
+- name: Mount NFS volume
+  ansible.posix.mount:
+    src: "{{ item.src }}"
+    path: "{{ item.path }}"
+    opts: rw
+    state: mounted
+    fstype: nfs
+  loop: "{{ nfs_client_mount }}"

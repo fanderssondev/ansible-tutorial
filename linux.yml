@@ -6,31 +6,27 @@
     - base
 
 - name: Setup users
-  hosts: all
+  hosts:
+    - server
+    - nfs_client
   become: true
   roles:
     - users
 
 - name: Configure web_servers
-  hosts: all
+  hosts: server
   become: true
   roles:
     - web_servers
 
-  # Handlers ====================================
-  handlers:
-    # - name: Restart nfs
-    #   ansible.builtin.systemd:
-    #     name: nfs-server
-    #     state: restarted
-    #     enabled: true
-    #     daemon_reload: true
-    #   listen: restart_nfs
+- name: Setup nfs server
+  hosts: server
+  become: true
+  roles:
+    - nfs_server
 
-    # - name: Restart rpcbind
-    #   ansible.builtin.systemd:
-    #     name: rpcbind
-    #     state: restarted
-    #     enabled: true
-    #     daemon_reload: true
-    #   listen: restart_rpcbind
+- name: Setup nfs storage
+  hosts: nfs_client
+  become: true
+  roles:
+    - nfs_client

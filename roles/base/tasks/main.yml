@@ -1,4 +1,8 @@
-- name: Install needed packages
+- name: Update package cache
+  ansible.builtin.package:
+    update_cache: true
+
+- name: Install packages
   ansible.builtin.package:
     name: "{{ base_packages }}"
 
@@ -12,3 +16,12 @@
   become: true
   community.general.timezone:
     name: "{{ base_timezone }}"
+
+- name: Copy files/templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0644"
+  loop: "{{ base_templates }}"
