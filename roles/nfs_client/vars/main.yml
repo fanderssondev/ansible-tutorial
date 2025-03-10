@@ -1,9 +1,9 @@
+nfs_client_regex:
+  - regexp: ^(Domain =)+\s*
+    line: "Domain = local.lab"
+
 nfs_client_mount:
   - src: rocky8a:/nfs/developers
     path: /mnt/developers
   - src: rocky8a:/nfs/testers
     path: /mnt/testers
-
-nfs_client_regex:
-  - regexp: ^(Domain =)+\s*
-    line: "Domain = local.lab"
