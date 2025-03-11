@@ -3,7 +3,7 @@ nfs_client_regex:
     line: "Domain = local.lab"
 
 nfs_client_mount:
-  - src: rocky8a:/nfs/developers
+  - src: rocky9a:/nfs/developers
     path: /mnt/developers
-  - src: rocky8a:/nfs/testers
+  - src: rocky9a:/nfs/testers
     path: /mnt/testers

@@ -6,7 +6,7 @@ all:
   children:
     server:
       hosts:
-        rocky8a:
+        rocky9a:
     nfs_client:
       hosts:
-        rocky8b:
+        rocky9b:

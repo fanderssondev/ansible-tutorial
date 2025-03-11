@@ -2,6 +2,15 @@
 - name: Configure Linux host
   hosts: all
   become: true
+  pre_tasks:
+    - name: Update package cache
+      ansible.builtin.dnf:
+        update_cache: true
+      changed_when: false
+
+- name: Configure Linux host
+  hosts: all
+  become: true
   roles:
     - base
 
@@ -25,7 +34,7 @@
   roles:
     - nfs_server
 
-- name: Setup nfs storage
+- name: Setup nfs client
   hosts: nfs_client
   become: true
   roles:
